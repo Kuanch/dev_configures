@@ -1,0 +1,116 @@
+set nocompatible              " be iMproved, required
+filetype off                  " required
+
+" set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+" alternatively, pass a path where Vundle should install plugins
+"call vundle#begin('~/some/path/here')
+
+" let Vundle manage Vundle, required
+Plugin 'VundleVim/Vundle.vim'
+
+" The following are examples of different formats supported.
+" Keep Plugin commands between vundle#begin/end.
+" plugin on GitHub repo
+Plugin 'tpope/vim-fugitive'
+Plugin 'scrooloose/syntastic'
+Plugin 'davidhalter/jedi-vim'
+Plugin 'lifepillar/vim-mucomplete'
+Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
+Plugin 'tell-k/vim-autopep8'
+Plugin 'airblade/vim-gitgutter'
+
+" All of your Plugins must be added before the following line
+call vundle#end()            " required
+filetype plugin indent on    " required
+" To ignore plugin indent changes, instead use:
+"filetype plugin on
+"
+" Brief help
+" :PluginList       - lists configured plugins
+" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
+" :PluginSearch foo - searches for foo; append `!` to refresh local cache
+" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
+"
+" see :h vundle for more details or wiki for FAQ
+" Put your non-Plugin stuff after this line
+" Vim setting
+set number
+
+" syntastic
+" cpp
+" let g:syntastic_debug=1
+let g:syntastic_c_compiler = 'clang'
+let g:syntastic_c_check_header = 0
+let g:syntastic_c_compiler_options = '-std=c++11 -stdlib=libc++ -isystem /usr/include/'
+let g:syntastic_cpp_compiler = 'clang++'
+let g:syntastic_cpp_compiler_options = '-std=c++11 -stdlib=libc++ -isystem /usr/include/'
+let g:syntastic_cpp_checkers = ['clang_check']
+let g:syntastic_cpp_check_header = 1
+let g:syntastic_cpp_include_dirs = ['/usr/include/c++/5.4.0', '../include', 'include' ]
+" let g:syntastic_cpp_auto_refresh_includes = 1
+" python
+let g:syntastic_python_python_exec = 'python3.8'
+let g:syntastic_py_checkers=['flake8']
+let g:syntastic_python_flake8_args='--ignore=E501,E741'
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_loc_list_height = 5
+let g:syntastic_auto_loc_list = 0
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+let g:syntastic_enble_signs = 0
+
+" for pep8
+"au BufNewFile,BufRead *.py
+set tabstop=4
+"set softtabstop=4
+"set shiftwidth=4
+"set expandtab
+"set autoindent
+"set fileformat=unix
+
+" airline
+let g:airline_pwerline_fonts = 0
+let g:airline_theme = 'luna'
+let g:airline#extensions#whitespace#enabled = 0 
+
+" jedi-vim
+let g:jedi#popup_select_first = 1
+let g:jedi#show_call_signatures = 1
+let g:jedi#popup_on_dot = 1
+let g:jedi#auto_vim_configuration = 0
+let g:jedi#use_tabs_not_buffers = 1
+
+" mucomplete
+set completeopt-=preview
+set completeopt+=longest
+set shortmess+=c
+set belloff+=ctrlg
+let g:jedi#popup_on_dot = 1
+let g:mucomplete#enable_auto_at_startup = 0
+let g:mucomplete#force_manual = 0
+" Allow auto popup without tab key for member completion in cpp, also if
+" manually invoked via tab key:
+" let g:mucomplete#can_complete = { }
+"let g:mucomplete#can_complete.default = { 'omni': { t -> t =~# '\m\k\%(\k\|\.\)$' } }
+
+nnoremap <buffer> <F9> :exec '!python3' shellescape(@%, 1)<cr>
+
+" Handle auto indention
+let &t_SI .= "\<Esc>[?2004h"
+let &t_EI .= "\<Esc>[?2004l"
+
+inoremap <special> <expr> <Esc>[200~ XTermPasteBegin()
+
+function! XTermPasteBegin()
+  set pastetoggle=<Esc>[201~
+  set paste
+  return ""
+endfunction
+
+" Handle saving after autopep8
+set buftype=
+" encounter
+"setlocal buftype=nofile 
