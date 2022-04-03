@@ -1,0 +1,60 @@
+FROM nvcr.io/nvidia/l4t-base:r32.4.4
+
+# working directory
+WORKDIR /darknet
+
+# install dependancy
+RUN \
+	apt-get update && apt-get install -y \
+	autoconf \
+    automake \
+	libtool
+
+RUN apt-get update && apt-get install -y \
+	build-essential \
+	pkg-config \
+	cmake \
+	git \
+	python3 \
+	python3-pip \
+	vim \
+	wget
+
+RUN pip3 install --upgrade pip==20.3.4
+
+# build opencv
+RUN apt-get update && apt-get install -y \
+	libsm6 libxext6 libxrender-dev
+RUN \
+	git clone https://github.com/opencv/opencv.git && \
+	cd opencv && git checkout 3.4.16 && \
+	git clone https://github.com/opencv/opencv_contrib.git && \
+	cd opencv_contrib && git checkout 3.4.16 && cd .. && \
+	mkdir build && cd build
+COPY ./opencv_cmake.sh /darknet/opencv/build
+RUN  cd /darknet/opencv/build && ./opencv_cmake.sh && \
+	make -j32 && make install && cd /darknet
+
+# build darknet
+RUN  \
+	git clone https://github.com/AlexeyAB/darknet.git && cd darknet
+COPY ./Makefile /darknet/darknet
+RUN \
+	apt-get install -y  && cd /darknet/darknet/ && make -j32
+
+# test darknet
+ENV DARKNET_PATH=/darknet/darknet${DARKNET_PATH:+:${DARKNET_PATH}}
+ENV PATH=/darknet/darknet${PATH:+:${PATH}}
+WORKDIR /darknet/darknet
+RUN wget http://pjreddie.com/media/files/yolo.weights
+RUN darknet detector test cfg/coco.data cfg/yolo.cfg yolo.weights data/dog.jpg
+
+# darknet python inference API
+COPY ./darknet_python /darknet/darknet_python
+RUN cd /darknet/darknet_python && \
+	pip3 install opencv-python==3.4.2.16 matplotlib pillow shapely 
+RUN cd /darknet/darknet_python && python3 detect.py
+
+# test nvidia docker
+CMD nvidia-smi -q
+
